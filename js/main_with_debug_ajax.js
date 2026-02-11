@@ -140,5 +140,57 @@ function addEvents() {
   table.addEventListener("click", clickme);
 }
 
-/* Run initialize when the page DOM is ready */
-document.addEventListener("DOMContentLoaded", initialize);
+
+
+
+/******************************************************
+ * Chapter 3 Activity 4: Debug AJAX
+ ******************************************************/
+
+// A global variable: we want to test where/when data is available
+var myData;
+
+// This function runs AFTER the data has loaded
+function debugCallback(data) {
+
+  // Save the loaded GeoJSON into the global variable
+  myData = data;
+
+  // Convert JSON object into a long string for display
+  var geojsonString = JSON.stringify(myData);
+
+  // Add the GeoJSON text to the page (inside #mydiv)
+  // <pre> keeps formatting, and pre-wrap lets long lines wrap
+  document.querySelector("#mydiv").insertAdjacentHTML(
+    "beforeend",
+    "<br><br><strong>GeoJSON data:</strong><br>" +
+      "<pre style='white-space: pre-wrap;'>" +
+        geojsonString +
+      "</pre>"
+  );
+
+  // Show that data IS available inside the callback
+  console.log("INSIDE callback (data ready):", myData);
+}
+
+// This function STARTS the fetch request
+function debugAjax() {
+
+  // Show that data is NOT available yet (because fetch is async)
+  console.log("OUTSIDE callback (not ready yet):", myData);
+
+  // Request the GeoJSON file
+  fetch("data/MegaCities.geojson")
+    // Convert Response -> JSON (this returns a Promise)
+    .then(function (response) {
+      return response.json();
+    })
+    // Now we have real JSON data, send to callback
+    .then(debugCallback);
+}
+
+// Run everything after HTML is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initialize(); // Chapter 2: build the table + add events
+  debugAjax();  // Chapter 3: fetch GeoJSON + print it
+});
